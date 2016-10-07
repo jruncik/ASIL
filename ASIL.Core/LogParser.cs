@@ -31,6 +31,7 @@ namespace ASIL.Core
             Message
         }
 
+        private StringBuilder _itemStrBuilder = new StringBuilder(512);
         private IList<LogItemType> _logItemTypes;
         private char _itemSeparator = ',';
 
@@ -65,12 +66,12 @@ namespace ASIL.Core
             Task<string> lineResult;
 
             lineResult = fileStream.ReadLineAsync();
-            _logItemTypes = ParseLogItemTipes(lineResult.Result.Split(_itemSeparator));
+            _logItemTypes = ParseLogItemTipes(SplitToItems(lineResult.Result));
 
             while (!fileStream.EndOfStream)
             {
                 lineResult = fileStream.ReadLineAsync();
-                ParseLine(lineResult.Result.Split(ItemSeparator));
+                ParseLine(SplitToItems(lineResult.Result));
             }
         }
 
@@ -80,33 +81,63 @@ namespace ASIL.Core
 
         private IList<string> SplitToItems(string logLine)
         {
-            int itemStart = 0;
-            int itemEnd = 0;
+            IList<string> logItems = new List<string>(16);
             bool isInQuotation = false;
 
-            StringBuilder logItem = new StringBuilder(512);
-            IList<string> logItems = new List<string>(16);
+            int strEnd = logLine.Length;
+            int strOneBeforeEndLength = strEnd - 1;
 
-            for (int i = 0; i < logLine.Length; ++i)
+            _itemStrBuilder.Clear();
+            for (int i = 0; i < strEnd; ++i)
             {
-                if (logLine[i] == '"' )
+                char currChar = logLine[i];
+                if (currChar == '"')
                 {
-                    // ToDo Text in "" + "" inside " " is "
+                    if (i < strOneBeforeEndLength && logLine[i + 1] == '"')
+                    {
+                        _itemStrBuilder.Append('"');
+                        ++i;
+                    }
+                    else
+                    {
+                        isInQuotation = !isInQuotation;
+                    }
                 }
+                else if (currChar == _itemSeparator)
+                {
+                    if (isInQuotation)
+                    {
+                        _itemStrBuilder.Append(currChar);
+                    }
+                    else
+                    {
+                        logItems.Add(_itemStrBuilder.ToString());
+                        _itemStrBuilder.Clear();
+                    }
+                }
+                else
+                {
+                    _itemStrBuilder.Append(currChar);
+                }
+            }
+
+            Debug.Assert(!isInQuotation, "Something go wrong we are still in quotation");
+            if (!isInQuotation)
+            {
+                logItems.Add(_itemStrBuilder.ToString());
+                _itemStrBuilder.Clear();
             }
 
             return logItems;
         }
 
-        private IList<LogItemType> ParseLogItemTipes(string[] logLine)
+        private IList<LogItemType> ParseLogItemTipes(IList<string> logLine)
         {
             IList<LogItemType> logItemTypes = new List<LogItemType>(16);
 
             foreach (string logItemStrType in logLine)
             {
-                string logItemText = GetInnerLogitemText(logItemStrType);
-
-                switch (logItemText)
+                switch (logItemStrType)
                 {
                     case "Application":
                     {
@@ -182,7 +213,7 @@ namespace ASIL.Core
 
                     default:
                     {
-                        if (logItemText.StartsWith("AddedDate"))
+                        if (logItemStrType.StartsWith("AddedDate"))
                         {
                             int hours = 0;
                             int minutes = 0;
@@ -192,7 +223,7 @@ namespace ASIL.Core
                         }
                         else
                         {
-                            Debug.Fail($"Unsupported log '{logItemText}' type detected! Please Add it!");
+                            Debug.Fail($"Unsupported log '{logItemStrType}' type detected! Please Add it!");
                             logItemTypes.Add(LogItemType.Unknown);
                         }
                     }
@@ -203,31 +234,23 @@ namespace ASIL.Core
         }
 
         // "AddedDate(GMT+2)","Application","Component","ComponentId","EntryType","EventType","InstanceId","Level","ProcessId","SessionId","Tenant","UserId","Message"
-        private void ParseLine(string[] logLine)
+        private void ParseLine(IList<string> logLine)
         {
-            Debug.Assert(logLine.Length == _logItemTypes.Count, "Mishmash in log entries detected!");
+            Debug.Assert(logLine.Count == _logItemTypes.Count, "Mishmash in log entries detected!");
 
             IList<LogItemType> logItemTypes = new List<LogItemType>(16);
             int idx = 0;
             foreach (string logItemStrType in logLine)
             {
-                string logItemText = GetInnerLogitemText(logItemStrType);
+                Debug.Write(logItemStrType);
+                Debug.Write(", ");
             }
+            Debug.WriteLine(String.Empty);
         }
 
         private LogEntry CreateLogEntry()
         {
             return null;
-        }
-
-        private static string GetInnerLogitemText(string logItemText)
-        {
-            if (logItemText.StartsWith("\"") && logItemText.EndsWith("\""))
-            {
-                logItemText = logItemText.Substring(1, logItemText.Length - 2);
-            }
-
-            return logItemText;
         }
     }
 }
