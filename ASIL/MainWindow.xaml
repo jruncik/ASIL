@@ -7,7 +7,12 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
-        <Button x:Name="button" Content="Button" HorizontalAlignment="Left" Margin="19,24,0,0" VerticalAlignment="Top" Width="75" Click="button_Click"/>
-
+        <DockPanel LastChildFill="True">
+            <StackPanel Orientation="Vertical" DockPanel.Dock="Top">
+                <Button x:Name="buttonLoad" Content="Load" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="75" Click="buttonLoad_Click" Grid.Column="2"/>
+            </StackPanel>
+            <DataGrid x:Name="dataGrid" DataContext="{Binding Source = LogEntries}" HorizontalAlignment="Left" VerticalAlignment="Top"
+               CanUserResizeColumns="True" CanUserResizeRows="False" Grid.Column="2" Margin="0,0,0,0"/>
+        </DockPanel>
     </Grid>
 </Window>

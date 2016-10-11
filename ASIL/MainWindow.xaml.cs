@@ -1,21 +1,25 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Windows;
-using ASIL.Core;
+
 using Microsoft.Win32;
+
+using ASIL.Core;
 
 namespace ASIL
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
+        private IList<LogEntryBase> _logEntries = new List<LogEntryBase>(0);
+
         public MainWindow()
         {
             InitializeComponent();
+
+            dataGrid.ItemsSource = _logEntries;
         }
 
-        private void button_Click(object sender, RoutedEventArgs e)
+        private void buttonLoad_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = @"Log Files|*.csv";
@@ -29,6 +33,7 @@ namespace ASIL
             {
                 logParser.ParseStream(sr);
             }
+            _logEntries = logParser.LogEntries;
         }
     }
 }
