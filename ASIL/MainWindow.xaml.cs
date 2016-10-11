@@ -1,47 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using ASIL.Core;
 using Microsoft.Win32;
 
 namespace ASIL
 {
-
-    struct LogTimeData
-    {
-        int year;
-        int month;
-        int day;
-        int gour;
-        int minute;
-        int seconds;
-        int millisecond;
-    }
-
-    class LogTimeParser
-    {
-    }
-
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
-        private LogParser _logParser = new LogParser();
-
         public MainWindow()
         {
             InitializeComponent();
@@ -56,11 +24,10 @@ namespace ASIL
                 return;
             }
 
-            _logParser.Clear();
-
+            LogParser logParser = new LogParser();
             using (StreamReader sr = new StreamReader(ofd.FileName))
             {
-                _logParser.ParseStream(sr);
+                logParser.ParseStream(sr);
             }
         }
     }

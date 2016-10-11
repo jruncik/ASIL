@@ -3,12 +3,10 @@ using System.Collections.Generic;
 
 namespace ASIL.Core
 {
-    //"AddedDate(GMT+2)","ComponentId","Tenant","UserId","Message"
-
-    internal class ItemsCollections<T>
+    internal class ItemsCollections<T> : IItemsCollection
     {
         private readonly Func<string, T> _creator;
-        private IDictionary<string, T> _items = new Dictionary<string, T>();
+        protected IDictionary<string, T> _items = new Dictionary<string, T>();
 
         internal ItemsCollections(Func<string, T> creator)
         {
@@ -17,9 +15,29 @@ namespace ASIL.Core
 
         internal T GetOrAdd(string itemValue)
         {
+            return (T)GetOrAddAsObject(itemValue);
+        }
+
+        public object GetOrAddAsObject(string itemValue)
+        {
             if (!_items.ContainsKey(itemValue))
             {
                 _items[itemValue] = _creator(itemValue);
+            }
+
+            return _items[itemValue];
+        }
+
+        internal T Get(string itemValue)
+        {
+            return (T)GetAsObject(itemValue);
+        }
+
+        public object GetAsObject(string itemValue)
+        {
+            if (!_items.ContainsKey(itemValue))
+            {
+                return null;
             }
 
             return _items[itemValue];
@@ -37,11 +55,7 @@ namespace ASIL.Core
         private int _timeShiftMinutes;
 
         internal LogTimes() :
-            base((itemValue) => {
-                DateTime logTime = DateTime.Parse(itemValue);
-                logTime = DateTime.Parse(itemValue);
-                return new LogTime(logTime);
-            })
+            base((itemValue) => { return new LogTime(itemValue); })
         {
         }
 
@@ -137,6 +151,26 @@ namespace ASIL.Core
         internal UserIds() :
             base((itemValue) => { return new UserId(itemValue); })
         {
+        }
+    }
+
+    internal class Messages : ItemsCollections<MessageBase>
+    {
+        internal Messages():
+            base((itemValue) => { return new Message(itemValue); })
+        {
+        }
+
+        internal MeasuredMessage AddTimeMessage(MeasuredMessage measuredMessage)
+        {
+            string itemValue = measuredMessage.ToString();
+
+            if (!_items.ContainsKey(itemValue))
+            {
+                _items[itemValue] = measuredMessage;
+            }
+
+            return measuredMessage;
         }
     }
 }

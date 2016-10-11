@@ -1,59 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-// "AddedDate(GMT+2)","Application","Component","ComponentId","EntryType","EventType","InstanceId","Level","ProcessId","SessionId","Tenant","UserId","Message"
 
 namespace ASIL.Core
 {
     public class LogParser
     {
-        private enum LogItemType
-        {
-            Unknown,
+        private readonly IList<LogEntryBase> _logEntries = new List<LogEntryBase>(1024);
 
-            LogTime,
-            Application,
-            Component,
-            ComponentId,
-            EntryType,
-            EventType,
-            InstanceId,
-            Level,
-            ProcessId,
-            SessionId,
-            Tenant,
-            UserId,
-            Message
-        }
-
-        private StringBuilder _itemStrBuilder = new StringBuilder(512);
-        private IList<LogItemType> _logItemTypes;
         private char _itemSeparator = ',';
-
-        private LogTimes _logTimes = new LogTimes();
-        private Applications _applications = new Applications();
-        private Components _components = new Components();
-        private ComponentIds _componentIds = new ComponentIds();
-        private EntryTypes _entryTypes = new EntryTypes();
-        private EventTypes _eventTypes = new EventTypes();
-        private InstanceIds _instanceIds = new InstanceIds();
-        private Levels _levels = new Levels();
-
-        private ProcessIds _processIds = new ProcessIds();
-        private SessionIds _sessionIds = new SessionIds();
-        private Tenants _tenants = new Tenants();
-        private UserIds _userIds = new UserIds();
-        // private Messages _logTimes = new LogTimes();
+        private StringBuilder _itemStrBuilder = new StringBuilder(512);
+        private LogEntryItemsHelper _logEntryItemHelper;
 
         public char ItemSeparator
         {
             get { return _itemSeparator; }
             set { _itemSeparator = value; }
+        }
+
+        public IList<LogEntryBase> LogEntries
+        {
+            get { return _logEntries; }
         }
 
         public void ParseStream(StreamReader fileStream)
@@ -63,20 +32,15 @@ namespace ASIL.Core
                 return;
             }
 
-            Task<string> lineResult;
+            Task<string> lineResult = fileStream.ReadLineAsync();
 
-            lineResult = fileStream.ReadLineAsync();
-            _logItemTypes = ParseLogItemTipes(SplitToItems(lineResult.Result));
+            ParseLogItemTipes(SplitToItems(lineResult.Result));
 
             while (!fileStream.EndOfStream)
             {
                 lineResult = fileStream.ReadLineAsync();
                 ParseLine(SplitToItems(lineResult.Result));
             }
-        }
-
-        public void Clear()
-        {
         }
 
         private IList<string> SplitToItems(string logLine)
@@ -131,9 +95,9 @@ namespace ASIL.Core
             return logItems;
         }
 
-        private IList<LogItemType> ParseLogItemTipes(IList<string> logLine)
+        private void ParseLogItemTipes(IList<string> logLine)
         {
-            IList<LogItemType> logItemTypes = new List<LogItemType>(16);
+            _logEntryItemHelper = new LogEntryItemsHelper(logLine.Count);
 
             foreach (string logItemStrType in logLine)
             {
@@ -141,73 +105,73 @@ namespace ASIL.Core
                 {
                     case "Application":
                     {
-                        logItemTypes.Add(LogItemType.Application);
+                        _logEntryItemHelper.AddItemType(new Applications(), typeof(Application));
                     }
                     break;
 
                     case "Component":
                     {
-                        logItemTypes.Add(LogItemType.Component);
+                        _logEntryItemHelper.AddItemType(new Components(), typeof(Component));
                     }
                     break;
 
                     case "ComponentId":
                     {
-                        logItemTypes.Add(LogItemType.ComponentId);
+                        _logEntryItemHelper.AddItemType(new ComponentIds(), typeof(ComponentId));
                     }
                     break;
 
                     case "EntryType":
                     {
-                        logItemTypes.Add(LogItemType.EntryType);
+                        _logEntryItemHelper.AddItemType(new EntryTypes(), typeof(ASIL.Core.EntryType));
                     }
                     break;
 
                     case "EventType":
                     {
-                        logItemTypes.Add(LogItemType.EventType);
+                        _logEntryItemHelper.AddItemType(new EventTypes(), typeof(EventType));
                     }
                     break;
 
                     case "InstanceId":
                     {
-                        logItemTypes.Add(LogItemType.InstanceId);
+                        _logEntryItemHelper.AddItemType(new InstanceIds(), typeof(InstanceId));
                     }
                     break;
 
                     case "Level":
                     {
-                        logItemTypes.Add(LogItemType.Level);
+                        _logEntryItemHelper.AddItemType(new Levels(), typeof(Level));
                     }
                     break;
 
                     case "ProcessId":
                     {
-                        logItemTypes.Add(LogItemType.ProcessId);
+                        _logEntryItemHelper.AddItemType(new ProcessIds(), typeof(ProcessId));
                     }
                     break;
 
                     case "SessionId":
                     {
-                        logItemTypes.Add(LogItemType.SessionId);
+                        _logEntryItemHelper.AddItemType(new SessionIds(), typeof(SessionId));
                     }
                     break;
 
                     case "Tenant":
                     {
-                        logItemTypes.Add(LogItemType.Tenant);
+                        _logEntryItemHelper.AddItemType(new Tenants(), typeof(Tenant));
                     }
                     break;
 
                     case "UserId":
                     {
-                        logItemTypes.Add(LogItemType.UserId);
+                        _logEntryItemHelper.AddItemType(new UserIds(), typeof(UserId));
                     }
                     break;
 
                     case "Message":
                     {
-                        logItemTypes.Add(LogItemType.Message);
+                        _logEntryItemHelper.AddItemType(new Messages(), typeof(MessageBase));
                     }
                     break;
 
@@ -218,39 +182,26 @@ namespace ASIL.Core
                             int hours = 0;
                             int minutes = 0;
 
-                            _logTimes.SetTimeShift(hours, minutes);
-                            logItemTypes.Add(LogItemType.LogTime);
+                            LogTimes logTimes = new LogTimes();
+                            logTimes.SetTimeShift(hours, minutes);
+
+                            _logEntryItemHelper.AddItemType(logTimes, typeof(LogTime));
                         }
                         else
                         {
                             Debug.Fail($"Unsupported log '{logItemStrType}' type detected! Please Add it!");
-                            logItemTypes.Add(LogItemType.Unknown);
+                            _logEntryItemHelper.AddItemType(new UnknowLogItems(), typeof(object));
                         }
                     }
                     break;
                 }
             }
-            return logItemTypes;
         }
 
-        // "AddedDate(GMT+2)","Application","Component","ComponentId","EntryType","EventType","InstanceId","Level","ProcessId","SessionId","Tenant","UserId","Message"
-        private void ParseLine(IList<string> logLine)
+        private void ParseLine(IList<string> logEntryLine)
         {
-            Debug.Assert(logLine.Count == _logItemTypes.Count, "Mishmash in log entries detected!");
-
-            IList<LogItemType> logItemTypes = new List<LogItemType>(16);
-            int idx = 0;
-            foreach (string logItemStrType in logLine)
-            {
-                Debug.Write(logItemStrType);
-                Debug.Write(", ");
-            }
-            Debug.WriteLine(String.Empty);
-        }
-
-        private LogEntry CreateLogEntry()
-        {
-            return null;
+            LogEntryBase logEntry = _logEntryItemHelper.CreateCurrentLogEntry(logEntryLine);
+            _logEntries.Add(logEntry);
         }
     }
 }
