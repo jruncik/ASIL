@@ -5,12 +5,14 @@ using System.Windows;
 using Microsoft.Win32;
 
 using ASIL.Core;
+using System.Collections.ObjectModel;
 
 namespace ASIL
 {
     public partial class MainWindow : Window
     {
-        private IList<LogEntryBase> _logEntries = new List<LogEntryBase>(0);
+        private readonly LogParser _logParser = new LogParser();
+        private ObservableCollection<LogEntryBase> _logEntries = new ObservableCollection<LogEntryBase>();
 
         public MainWindow()
         {
@@ -28,12 +30,18 @@ namespace ASIL
                 return;
             }
 
-            LogParser logParser = new LogParser();
+            _logParser.Clear();
             using (StreamReader sr = new StreamReader(ofd.FileName))
             {
-                logParser.ParseStream(sr);
+                _logParser.ParseStream(sr);
             }
-            _logEntries = logParser.LogEntries;
+
+            _logEntries.Clear();
+            foreach (LogEntryBase logEntry in _logParser.LogEntries)
+            {
+                _logEntries.Add(logEntry);
+            }
+            dataGrid.Items.Refresh();
         }
     }
 }

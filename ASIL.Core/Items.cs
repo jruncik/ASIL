@@ -43,7 +43,12 @@ namespace ASIL.Core
         {
             if (!String.IsNullOrEmpty(value))
             {
-                Value = new EngineId(Int32.Parse(value));
+                string engineId = value;
+                if (engineId.StartsWith("Engine"))
+                {
+                    engineId = engineId.Substring(6).Trim();
+                }
+                Value = new EngineId(Int32.Parse(engineId));
             }
             else
             {

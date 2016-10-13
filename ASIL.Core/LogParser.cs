@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -41,6 +42,11 @@ namespace ASIL.Core
                 lineResult = fileStream.ReadLineAsync();
                 ParseLine(SplitToItems(lineResult.Result));
             }
+        }
+
+        public void Clear()
+        {
+            _logEntries.Clear();
         }
 
         private IList<string> SplitToItems(string logLine)

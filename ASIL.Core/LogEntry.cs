@@ -16,19 +16,17 @@ namespace ASIL.Core
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void OnPropertyChange(string propertyName)
+    {
+        if (PropertyChanged != null)
         {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
     }
+    }
 
-    public abstract class LogEntryBase : INotifyPropertyChanged
+    public abstract class LogEntryBase
     {
         private readonly LogTime _logTime;
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public LogTime LogTime { get { return _logTime; } }
         public abstract Application Application { get; }
@@ -49,15 +47,6 @@ namespace ASIL.Core
         {
             _logTime = logTime;
         }
-
-        protected void OnPropertyChange(string propertyName)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-
     }
 
     public class LogEntry : LogEntryBase
@@ -75,7 +64,7 @@ namespace ASIL.Core
         private readonly UserId _userId;
         private readonly MessageBase _message;
 
-        public override Application Application { get { return _application; OnPropertyChange("Application"); } }
+        public override Application Application { get { return _application; } }
         public override Component Component { get { return _component; } }
         public override ComponentId EngineId { get { return _componentId; } }
         public override EntryType EntryType { get { return _entryType; } }
