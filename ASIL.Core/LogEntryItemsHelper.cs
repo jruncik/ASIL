@@ -18,29 +18,41 @@ namespace ASIL.Core
             }
         }
 
-        private readonly int _itemsCount;
-        private readonly IList<IItemsCollection> _typedCollections;
-        private readonly object[] _currentLogEntryItems;
+        private IList<IItemsCollection> _typedCollections;
+        private object[] _currentLogEntryItems;
+        private int _itemsCount;
 
-        private int _logTimeIdx = -1;
+        private int _logTimeIdx     = -1;
         private int _applicationIdx = -1;
-        private int _componentIdx = -1;
+        private int _componentIdx   = -1;
         private int _componentIdIdx = -1;
-        private int _entryTypeIdx = -1;
-        private int _eventTypeIdx = -1;
-        private int _instanceIdIdx = -1;
-        private int _levelIdx = -1;
-        private int _processIdIdx = -1;
-        private int _sessionIdIdx = -1;
-        private int _tenantIdx = -1;
-        private int _userIdIdx = -1;
+        private int _entryTypeIdx   = -1;
+        private int _eventTypeIdx   = -1;
+        private int _instanceIdIdx  = -1;
+        private int _levelIdx       = -1;
+        private int _processIdIdx   = -1;
+        private int _sessionIdIdx   = -1;
+        private int _tenantIdx      = -1;
+        private int _userIdIdx      = -1;
         private int _messageBaseIdx = -1;
 
-        internal LogEntryItemsHelper(int itemsCount)
+        internal LogEntryItemsHelper()
+        {
+            Clear();
+        }
+
+        internal void Clear()
+        {
+            Reset(0);
+        }
+
+        internal void Reset(int itemsCount)
         {
             _itemsCount = itemsCount;
             _typedCollections = new List<IItemsCollection>(_itemsCount);
             _currentLogEntryItems = new object[_itemsCount];
+
+            ClearCurrentEntryItems();
         }
 
         internal void ClearCurrentEntryItems()
@@ -72,7 +84,7 @@ namespace ASIL.Core
             {
                 _componentIdIdx = idx;
             }
-            else if (itemType == typeof(ASIL.Core.EntryType))
+            else if (itemType == typeof(EntryType))
             {
                 _entryTypeIdx = idx;
             }
@@ -132,6 +144,20 @@ namespace ASIL.Core
             }
             return new LogEntry(LogTime, Application, Component, EngineId, EntryType, EventType, InstanceId, Level, ProcessId, SessionId, Tenant, UserId, Message);
         }
+
+        internal LogTimes LogTimes { get { return (LogTimes)_typedCollections[_logTimeIdx]; } }
+        internal Applications Applications { get { return (Applications)_typedCollections[_applicationIdx]; } }
+        internal Components Components { get { return (Components)_typedCollections[_componentIdx]; } }
+        internal ComponentIds EngineIds { get { return (ComponentIds)_typedCollections[_componentIdIdx]; } }
+        internal EntryTypes EntryTypes { get { return (EntryTypes)_typedCollections[_entryTypeIdx]; } }
+        internal EventTypes EventTypes { get { return (EventTypes)_typedCollections[_eventTypeIdx]; } }
+        internal InstanceIds InstanceIds { get { return (InstanceIds)_typedCollections[_instanceIdIdx]; } }
+        internal Levels Levels { get { return (Levels)_typedCollections[_levelIdx]; } }
+        internal ProcessIds ProcessIds { get { return (ProcessIds)_typedCollections[_processIdIdx]; } }
+        internal SessionIds SessionIds { get { return (SessionIds)_typedCollections[_sessionIdIdx]; } }
+        internal Tenants Tenants { get { return (Tenants)_typedCollections[_tenantIdx]; } }
+        internal UserIds UserIds { get { return (UserIds)_typedCollections[_userIdIdx]; } }
+        internal Messages Messages { get { return (Messages)_typedCollections[_messageBaseIdx]; } }
 
         private bool ReadCurrentLogEntryItem(IList<string> logEntryLine)
         {

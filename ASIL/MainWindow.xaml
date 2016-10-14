@@ -11,7 +11,7 @@
             <StackPanel Orientation="Vertical" DockPanel.Dock="Top">
                 <Button x:Name="buttonLoad" Content="Load" HorizontalAlignment="Left" Margin="0,0,0,0" VerticalAlignment="Top" Width="75" Click="buttonLoad_Click" Grid.Column="2"/>
             </StackPanel>
-            <DataGrid x:Name="dataGrid" DataContext="{Binding Source = LogEntries}" HorizontalAlignment="Left" VerticalAlignment="Top"
+            <DataGrid x:Name="dataGrid" DataContext="{Binding Source = LogEntries}" HorizontalAlignment="Left" VerticalAlignment="Top" AutoGenerateColumns="false"
                CanUserResizeColumns="True" CanUserResizeRows="False" Grid.Column="2" Margin="0,0,0,0"/>
         </DockPanel>
     </Grid>

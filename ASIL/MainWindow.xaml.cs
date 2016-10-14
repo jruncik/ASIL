@@ -6,19 +6,20 @@ using Microsoft.Win32;
 
 using ASIL.Core;
 using System.Collections.ObjectModel;
+using ASIL.DynamicModel;
+using System.Linq;
+using System.Windows.Data;
+using System.Windows.Controls;
 
 namespace ASIL
 {
     public partial class MainWindow : Window
     {
-        private readonly LogParser _logParser = new LogParser();
-        private ObservableCollection<LogEntryBase> _logEntries = new ObservableCollection<LogEntryBase>();
-
         public MainWindow()
         {
             InitializeComponent();
 
-            dataGrid.ItemsSource = _logEntries;
+            
         }
 
         private void buttonLoad_Click(object sender, RoutedEventArgs e)
@@ -30,18 +31,61 @@ namespace ASIL
                 return;
             }
 
-            _logParser.Clear();
-            using (StreamReader sr = new StreamReader(ofd.FileName))
+            dataGrid.ItemsSource = null;
+
+            try
             {
-                _logParser.ParseStream(sr);
+                LogParser logParser = new LogParser();
+                using (StreamReader sr = new StreamReader(ofd.FileName))
+                {
+                    logParser.ParseStream(sr);
+                }
+
+                ObservableCollection<Record> data = GenerateEnginesViewData(logParser);
+                GenerateColumnas(data);
+                dataGrid.ItemsSource = data;
+            }
+            catch (System.Exception)
+            {
+                dataGrid.ItemsSource = null;
             }
 
-            _logEntries.Clear();
-            foreach (LogEntryBase logEntry in _logParser.LogEntries)
-            {
-                _logEntries.Add(logEntry);
-            }
             dataGrid.Items.Refresh();
         }
+
+        private ObservableCollection<Record> GenerateEnginesViewData(LogParser logParser)
+        {
+            ObservableCollection<Record> data = new ObservableCollection<Record>();
+
+            foreach (LogEntry logEntry in logParser.LogEntries)
+            {
+                data.Add(new Record(new Property("Log Time", logEntry.LogTime.ToString()), new Property("Message", logEntry.Message.ToString())));
+            }
+
+            return data;
+        }
+
+        private void GenerateColumnas(ObservableCollection<Record> data)
+        {
+            var columns = data.First().Properties.Select((x, i) => new { Name = x.Name, Index = i }).ToArray();
+            foreach (var item in data)
+            {
+                var binding = new Binding(string.Format("Properties[{0}].Value", item.Index));
+                dataGrid.Columns.Add(new DataGridTextColumn() { Header = item.Name, Binding = binding });
+            }
+
+
+            ObservableCollection<Record> records = new ObservableCollection<Record>();
+            records.Add(new Record(new Property("FirstName", "xxx"), new Property("LastName", "aaa")));
+            records.Add(new Record(new Property("FirstName", "zzz"), new Property("LastName", "bbb")));
+
+            var columnsx = records.First().Properties.Select((x, i) => new { Name = x.Name, Index = i }).ToArray();
+            foreach (var column in columnsx)
+            {
+                var binding = new Binding(string.Format("Properties[{0}].Value", column.Index));
+                dataGrid.Columns.Add(new DataGridTextColumn() { Header = column.Name, Binding = binding });
+            }
+        }
+
     }
 }

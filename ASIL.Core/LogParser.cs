@@ -9,11 +9,11 @@ namespace ASIL.Core
 {
     public class LogParser
     {
+        private readonly LogEntryItemsHelper _logEntryItemHelper = new LogEntryItemsHelper();
         private readonly IList<LogEntryBase> _logEntries = new List<LogEntryBase>(1024);
+        private readonly StringBuilder _itemStrBuilder = new StringBuilder(512);
 
         private char _itemSeparator = ',';
-        private StringBuilder _itemStrBuilder = new StringBuilder(512);
-        private LogEntryItemsHelper _logEntryItemHelper;
 
         public char ItemSeparator
         {
@@ -35,7 +35,7 @@ namespace ASIL.Core
 
             Task<string> lineResult = fileStream.ReadLineAsync();
 
-            ParseLogItemTipes(SplitToItems(lineResult.Result));
+            ParseHeader(SplitToItems(lineResult.Result));
 
             while (!fileStream.EndOfStream)
             {
@@ -46,8 +46,23 @@ namespace ASIL.Core
 
         public void Clear()
         {
+            _logEntryItemHelper.Clear();
             _logEntries.Clear();
         }
+
+        public IEnumerable<LogTime> LogTimes { get { return _logEntryItemHelper.LogTimes; } }
+        public IEnumerable<Application> Applications { get { return _logEntryItemHelper.Applications; } }
+        public IEnumerable<Component> Components { get { return _logEntryItemHelper.Components; } }
+        public IEnumerable<ComponentId> EngineIds { get { return _logEntryItemHelper.EngineIds; } }
+        public IEnumerable<EntryType> EntryTypes { get { return _logEntryItemHelper.EntryTypes; } }
+        public IEnumerable<EventType> EventTypes { get { return _logEntryItemHelper.EventTypes; } }
+        public IEnumerable<InstanceId> InstanceIds { get { return _logEntryItemHelper.InstanceIds; } }
+        public IEnumerable<Level> Levels { get { return _logEntryItemHelper.Levels; } }
+        public IEnumerable<ProcessId> ProcessIds { get { return _logEntryItemHelper.ProcessIds; } }
+        public IEnumerable<SessionId> SessionIds { get { return _logEntryItemHelper.SessionIds; } }
+        public IEnumerable<Tenant> Tenants { get { return _logEntryItemHelper.Tenants; } }
+        public IEnumerable<UserId> UserIds { get { return _logEntryItemHelper.UserIds; } }
+        public IEnumerable<MessageBase> Messages { get { return _logEntryItemHelper.Messages; } }
 
         private IList<string> SplitToItems(string logLine)
         {
@@ -101,9 +116,9 @@ namespace ASIL.Core
             return logItems;
         }
 
-        private void ParseLogItemTipes(IList<string> logLine)
+        private void ParseHeader(IList<string> logLine)
         {
-            _logEntryItemHelper = new LogEntryItemsHelper(logLine.Count);
+            _logEntryItemHelper.Reset(logLine.Count);
 
             foreach (string logItemStrType in logLine)
             {

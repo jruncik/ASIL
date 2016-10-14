@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace ASIL.Core
 {
-    internal class ItemsCollections<T> : IItemsCollection
+    internal class ItemsCollections<T> : IItemsCollection, IEnumerable<T>
     {
         private readonly Func<string, T> _creator;
         protected IDictionary<string, T> _items = new Dictionary<string, T>();
@@ -46,6 +47,19 @@ namespace ASIL.Core
         internal void Clear()
         {
             _items.Clear();
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            foreach (T item in _items.Values)
+            {
+                yield return item;
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 
