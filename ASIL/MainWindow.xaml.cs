@@ -68,24 +68,11 @@ namespace ASIL
         private void GenerateColumnas(ObservableCollection<Record> data)
         {
             var columns = data.First().Properties.Select((x, i) => new { Name = x.Name, Index = i }).ToArray();
-            foreach (var item in data)
+            foreach (var item in columns)
             {
                 var binding = new Binding(string.Format("Properties[{0}].Value", item.Index));
                 dataGrid.Columns.Add(new DataGridTextColumn() { Header = item.Name, Binding = binding });
             }
-
-
-            ObservableCollection<Record> records = new ObservableCollection<Record>();
-            records.Add(new Record(new Property("FirstName", "xxx"), new Property("LastName", "aaa")));
-            records.Add(new Record(new Property("FirstName", "zzz"), new Property("LastName", "bbb")));
-
-            var columnsx = records.First().Properties.Select((x, i) => new { Name = x.Name, Index = i }).ToArray();
-            foreach (var column in columnsx)
-            {
-                var binding = new Binding(string.Format("Properties[{0}].Value", column.Index));
-                dataGrid.Columns.Add(new DataGridTextColumn() { Header = column.Name, Binding = binding });
-            }
         }
-
     }
 }
