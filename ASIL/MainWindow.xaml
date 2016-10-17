@@ -8,7 +8,7 @@
         Title="ASIL" Height="350" Width="525">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="25" />
+            <RowDefinition Height="30" />
             <RowDefinition />
         </Grid.RowDefinitions>
 
@@ -18,7 +18,7 @@
                 Width="75"
                 Margin="5,0,0,0"
                 HorizontalAlignment="Left"
-                VerticalAlignment="Top"
+                VerticalAlignment="Center"
                 Click="buttonLoad_Click"
                 Content="Load" />
 
@@ -27,8 +27,9 @@
                   Grid.Column="0"
                   Content="All"
                   HorizontalAlignment="Left"
+                  VerticalAlignment="Top"
                   IsChecked="True"
-                  Margin="85,10,0,0"
+                  Margin="105,10,0,0"
                   Checked="checkBoxAll_Checked"
                   Unchecked="checkBoxAll_Checked"/>
 
@@ -37,7 +38,8 @@
                   Grid.Column="0"
                   Content="Time"
                   HorizontalAlignment="Left"
-                  Margin="165,10,0,0" Height="15" VerticalAlignment="Top"
+                  VerticalAlignment="Top"
+                  Margin="165,10,0,0" Height="15"
                   Checked="checkBoxTime_Checked"
                   Unchecked="checkBoxTime_Checked"/>
 
@@ -47,9 +49,19 @@
                   Content="Load"
                   HorizontalAlignment="Left"
                   VerticalAlignment="Top"
-                  Margin="245,10,0,0"
+                  Margin="225,10,0,0"
                   Checked="checkBoxLoad_Checked"
                   Unchecked="checkBoxLoad_Checked"/>
+
+        <CheckBox x:Name="checkBoxCalculte"
+                  Grid.Row="0"
+                  Grid.Column="0"
+                  Content="Calculte"
+                  HorizontalAlignment="Left"
+                  VerticalAlignment="Top"
+                  Margin="285,10,0,0"
+                  Checked="checkBoxCalculte_Checked"
+                  Unchecked="checkBoxCalculte_Checked"/>
 
         <DataGrid x:Name="dataGrid"
                   Grid.Row="1"

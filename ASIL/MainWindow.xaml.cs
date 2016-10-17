@@ -18,10 +18,13 @@ namespace ASIL
     [Flags]
     internal enum LogFilter
     {
-        None    = 0x00,
-        Load    = 0x01,
-        Time    = 0x02,
-        All     = 0xFF
+        None        = 0x00,
+
+        Load        = 0x01,
+        Time        = 0x02,
+        Calculate   = 0x04,
+
+        All         = 0xFF
     }
 
     public partial class MainWindow : Window
@@ -76,13 +79,20 @@ namespace ASIL
             else
             {
                 _logFilter = LogFilter.None;
+
                 if (IsChecked(checkBoxLoad))
                 {
                     _logFilter |= LogFilter.Load;
                 }
+
                 if (IsChecked(checkBoxTime))
                 {
                     _logFilter |= LogFilter.Time;
+                }
+
+                if (IsChecked(checkBoxCalculte))
+                {
+                    _logFilter |= LogFilter.Calculate;
                 }
             }
 
@@ -112,6 +122,20 @@ namespace ASIL
             else
             {
                 _logFilter &= ~LogFilter.Time;
+            }
+
+            GenerateViewData();
+        }
+
+        private void checkBoxCalculte_Checked(object sender, RoutedEventArgs e)
+        {
+            if (IsChecked(checkBoxCalculte))
+            {
+                _logFilter |= LogFilter.Calculate;
+            }
+            else
+            {
+                _logFilter &= ~LogFilter.Calculate;
             }
 
             GenerateViewData();
@@ -179,6 +203,11 @@ namespace ASIL
                 addEntry |= message.StartsWith(@"Rendering report");
             }
 
+            if ((int)(_logFilter & LogFilter.Calculate) == (int)LogFilter.Calculate)
+            {
+                addEntry |= message.Contains(@"Calculating hyperblock");
+            }
+
             return addEntry;
         }
 
@@ -197,6 +226,8 @@ namespace ASIL
 
         private void GenerateColumnas(ObservableCollection<Record> data)
         {
+            dataGrid.Columns.Clear();
+
             if (data.Count == 0)
             {
                 return;

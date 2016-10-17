@@ -22,18 +22,18 @@ namespace ASIL.Core
         private object[] _currentLogEntryItems;
         private int _itemsCount;
 
-        private int _logTimeIdx     = -1;
+        private int _logTimeIdx = -1;
         private int _applicationIdx = -1;
-        private int _componentIdx   = -1;
+        private int _componentIdx = -1;
         private int _componentIdIdx = -1;
-        private int _entryTypeIdx   = -1;
-        private int _eventTypeIdx   = -1;
-        private int _instanceIdIdx  = -1;
-        private int _levelIdx       = -1;
-        private int _processIdIdx   = -1;
-        private int _sessionIdIdx   = -1;
-        private int _tenantIdx      = -1;
-        private int _userIdIdx      = -1;
+        private int _entryTypeIdx = -1;
+        private int _eventTypeIdx = -1;
+        private int _instanceIdIdx = -1;
+        private int _levelIdx = -1;
+        private int _processIdIdx = -1;
+        private int _sessionIdIdx = -1;
+        private int _tenantIdx = -1;
+        private int _userIdIdx = -1;
         private int _messageBaseIdx = -1;
 
         internal LogEntryItemsHelper()
@@ -129,17 +129,20 @@ namespace ASIL.Core
                 return null;
             }
 
-            EntryType entryType = (EntryType)_currentLogEntryItems[_entryTypeIdx];
-            switch (entryType.Value)
+            if (_entryTypeIdx != -1)
             {
-                case Infor.BI.Log.EntryType.TimeStart:
+                EntryType entryType = (EntryType)_currentLogEntryItems[_entryTypeIdx];
+                switch (entryType.Value)
                 {
-                    return new LogEntry(LogTime, Application, Component, EngineId, EntryType, EventType, InstanceId, Level, ProcessId, SessionId, Tenant, UserId, Message);
-                }
+                    case Infor.BI.Log.EntryType.TimeStart:
+                    {
+                        return new LogEntry(LogTime, Application, Component, EngineId, EntryType, EventType, InstanceId, Level, ProcessId, SessionId, Tenant, UserId, Message);
+                    }
 
-                case Infor.BI.Log.EntryType.TimeEnd:
-                {
-                    return new LogEntry(LogTime, Application, Component, EngineId, EntryType, EventType, InstanceId, Level, ProcessId, SessionId, Tenant, UserId, Message);
+                    case Infor.BI.Log.EntryType.TimeEnd:
+                    {
+                        return new LogEntry(LogTime, Application, Component, EngineId, EntryType, EventType, InstanceId, Level, ProcessId, SessionId, Tenant, UserId, Message);
+                    }
                 }
             }
             return new LogEntry(LogTime, Application, Component, EngineId, EntryType, EventType, InstanceId, Level, ProcessId, SessionId, Tenant, UserId, Message);
@@ -210,19 +213,161 @@ namespace ASIL.Core
             return true;
         }
 
-        private LogTime LogTime { get { return (LogTime)_currentLogEntryItems[_logTimeIdx]; } }
-        private Application Application { get { return (Application)_currentLogEntryItems[_applicationIdx]; } }
-        private Component Component { get { return (Component)_currentLogEntryItems[_componentIdx]; } }
-        private ComponentId EngineId { get { return (ComponentId)_currentLogEntryItems[_componentIdIdx]; } }
-        private EntryType EntryType { get { return (EntryType)_currentLogEntryItems[_entryTypeIdx]; } }
-        private EventType EventType { get { return (EventType)_currentLogEntryItems[_eventTypeIdx]; } }
-        private InstanceId InstanceId { get { return (InstanceId)_currentLogEntryItems[_instanceIdIdx]; } }
-        private Level Level { get { return (Level)_currentLogEntryItems[_levelIdx]; } }
-        private ProcessId ProcessId { get { return (ProcessId)_currentLogEntryItems[_processIdIdx]; } }
-        private SessionId SessionId { get { return (SessionId)_currentLogEntryItems[_sessionIdIdx]; } }
-        private Tenant Tenant { get { return (Tenant)_currentLogEntryItems[_tenantIdx]; } }
-        private UserId UserId { get { return (UserId)_currentLogEntryItems[_userIdIdx]; } }
-        private MessageBase Message { get { return (MessageBase)_currentLogEntryItems[_messageBaseIdx]; } }
+        private LogTime LogTime
+        {
+            get
+            {
+                if (_logTimeIdx == -1)
+                {
+                    return LogTime.Empty;
+                }
+                return (LogTime)_currentLogEntryItems[_logTimeIdx];
+            }
+        }
+
+        private Application Application
+        {
+            get
+            {
+                if (_applicationIdx == -1)
+                {
+                    return Application.Empty;
+                }
+                return (Application)_currentLogEntryItems[_applicationIdx];
+            }
+        }
+
+        private Component Component
+        {
+            get
+            {
+                if (_componentIdx == -1)
+                {
+                    return Component.Empty;
+                }
+                return (Component)_currentLogEntryItems[_componentIdx];
+            }
+        }
+
+        private ComponentId EngineId
+        {
+            get
+            {
+                if (_componentIdIdx == -1)
+                {
+                    return ComponentId.Empty;
+                }
+                return (ComponentId)_currentLogEntryItems[_componentIdIdx];
+            }
+        }
+
+        private EntryType EntryType
+        {
+            get
+            {
+                if (_entryTypeIdx == -1)
+                {
+                    return EntryType.Empty;
+                }
+                return (EntryType)_currentLogEntryItems[_entryTypeIdx];
+            }
+        }
+
+        private EventType EventType
+        {
+            get
+            {
+                if (_eventTypeIdx == -1)
+                {
+                    return EventType.Empty;
+                }
+                return (EventType)_currentLogEntryItems[_eventTypeIdx];
+            }
+        }
+
+        private InstanceId InstanceId
+        {
+            get
+            {
+                if (_instanceIdIdx == -1)
+                {
+                    return InstanceId.Empty;
+                }
+                return (InstanceId)_currentLogEntryItems[_instanceIdIdx];
+            }
+        }
+
+        private Level Level
+        {
+            get
+            {
+                if (_levelIdx == -1)
+                {
+                    return Level.Empty;
+                }
+                return (Level)_currentLogEntryItems[_levelIdx];
+            }
+        }
+
+        private ProcessId ProcessId
+        {
+            get
+            {
+                if (_processIdIdx == -1)
+                {
+                    return ProcessId.Empty;
+                }
+                return (ProcessId)_currentLogEntryItems[_processIdIdx];
+            }
+        }
+
+        private SessionId SessionId
+        {
+            get
+            {
+                if (_sessionIdIdx == -1)
+                {
+                    return SessionId.Empty;
+                }
+                return (SessionId)_currentLogEntryItems[_sessionIdIdx];
+            }
+        }
+
+        private Tenant Tenant
+        {
+            get
+            {
+                if (_tenantIdx == -1)
+                {
+                    return Tenant.Empty;
+                }
+                return (Tenant)_currentLogEntryItems[_tenantIdx];
+            }
+        }
+
+        private UserId UserId
+        {
+            get
+            {
+                if (_userIdIdx == -1)
+                {
+                    return UserId.Empty;
+                }
+                return (UserId)_currentLogEntryItems[_userIdIdx];
+            }
+        }
+
+        private MessageBase Message
+        {
+            get
+            {
+                if (_messageBaseIdx == -1)
+                {
+                    return ASIL.Core.Message.Empty;
+                }
+                return (MessageBase)_currentLogEntryItems[_messageBaseIdx];
+            }
+        }
 
         private MessageTimeInfo TryGetMessageWithTime(string logEntryItem)
         {

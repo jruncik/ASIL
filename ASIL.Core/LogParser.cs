@@ -35,6 +35,8 @@ namespace ASIL.Core
 
             Task<string> lineResult = fileStream.ReadLineAsync();
 
+            CheckSeparator(lineResult.Result);
+
             ParseHeader(SplitToItems(lineResult.Result));
 
             while (!fileStream.EndOfStream)
@@ -63,6 +65,32 @@ namespace ASIL.Core
         public IEnumerable<Tenant> Tenants { get { return _logEntryItemHelper.Tenants; } }
         public IEnumerable<UserId> UserIds { get { return _logEntryItemHelper.UserIds; } }
         public IEnumerable<MessageBase> Messages { get { return _logEntryItemHelper.Messages; } }
+
+        private void CheckSeparator(string logEntryLine)
+        {
+            IList<string> result;
+            char oldSeparator = _itemSeparator;
+
+            result = SplitToItems(logEntryLine);
+
+            if (result.Count == 1 && result[0] == logEntryLine)
+            {
+                if (_itemSeparator == ',')
+                {
+                    _itemSeparator = ';';
+                }
+                else if (_itemSeparator == ';')
+                {
+                    _itemSeparator = ',';
+                }
+            }
+
+            result = SplitToItems(logEntryLine);
+            if (result.Count == 1 && result[0] == logEntryLine)
+            {
+                _itemSeparator = oldSeparator;
+            }
+        }
 
         private IList<string> SplitToItems(string logLine)
         {

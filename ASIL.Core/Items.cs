@@ -9,6 +9,8 @@ namespace ASIL.Core
     {
         public string Value { get; private set; }
 
+        public static Application Empty = new Application(String.Empty);
+
         public Application(string value)
         {
             Value = value;
@@ -24,6 +26,8 @@ namespace ASIL.Core
     {
         public string Value { get; private set; }
 
+        public static Component Empty = new Component(String.Empty);
+
         public Component(string value)
         {
             Value = value;
@@ -38,6 +42,8 @@ namespace ASIL.Core
     public class ComponentId
     {
         public EngineId Value { get; private set; }
+
+        public static ComponentId Empty = new ComponentId(String.Empty);
 
         public ComponentId(string value)
         {
@@ -66,6 +72,8 @@ namespace ASIL.Core
     {
         public Infor.BI.Log.EntryType Value { get; private set; }
 
+        public static EntryType Empty = new EntryType(Infor.BI.Log.EntryType.General.ToString());
+
         public EntryType(string value)
         {
             Value = (Infor.BI.Log.EntryType)Enum.Parse(typeof(Infor.BI.Log.EntryType), value);
@@ -81,6 +89,8 @@ namespace ASIL.Core
     {
         public int Value { get; private set; }
 
+        public static EventType Empty = new EventType();
+
         public EventType(string value)
         {
             Value = Int32.Parse(value);
@@ -90,11 +100,18 @@ namespace ASIL.Core
         {
             return Value.ToString();
         }
+
+        private EventType()
+        {
+            Value = Int32.MinValue;
+        }
     }
 
     public class InstanceId
     {
         public string Value { get; private set; }
+
+        public static InstanceId Empty = new InstanceId(String.Empty);
 
         public InstanceId(string value)
         {
@@ -111,6 +128,8 @@ namespace ASIL.Core
     {
         public LogLevel Value { get; private set; }
 
+        public static Level Empty = new Level(LogLevel.Debug.ToString());
+
         public Level(string value)
         {
             Value = (LogLevel)Enum.Parse(typeof(LogLevel), value);
@@ -126,6 +145,8 @@ namespace ASIL.Core
     {
         public int Value { get; private set; }
 
+        public static ProcessId Empty = new ProcessId();
+
         public ProcessId(string value)
         {
             Value = Int32.Parse(value);
@@ -135,11 +156,18 @@ namespace ASIL.Core
         {
             return Value.ToString();
         }
+
+        private ProcessId()
+        {
+            Value = Int32.MinValue;
+        }
     }
 
     public class SessionId
     {
         public string Value { get; private set; }
+
+        public static SessionId Empty = new SessionId(String.Empty);
 
         public SessionId(string value)
         {
@@ -156,6 +184,8 @@ namespace ASIL.Core
     {
         public string Value { get; private set; }
 
+        public static Tenant Empty = new Tenant(String.Empty);
+
         public Tenant(string value)
         {
             Value = value;
@@ -170,6 +200,8 @@ namespace ASIL.Core
     public class UserId
     {
         public string Value { get; private set; }
+
+        public static UserId Empty = new UserId(String.Empty);
 
         public UserId(string value)
         {
@@ -186,6 +218,8 @@ namespace ASIL.Core
     {
         public DateTime Value { get; private set; }
 
+        public static LogTime Empty = new LogTime();
+
         public LogTime(string value)
         {
             Value = DateTime.Parse(value);
@@ -194,6 +228,11 @@ namespace ASIL.Core
         public override string ToString()
         {
             return Value.ToString();
+        }
+
+        private LogTime()
+        {
+            Value = DateTime.MinValue;
         }
     }
 
@@ -204,6 +243,8 @@ namespace ASIL.Core
     public class Message : MessageBase
     {
         public string MsgText { get; private set; }
+
+        public static MessageBase Empty = new Message(String.Empty);
 
         public Message(string msgText)
         {
