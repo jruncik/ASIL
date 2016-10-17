@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace ASIL.Core
 {
@@ -178,13 +179,11 @@ namespace ASIL.Core
         internal MeasuredMessage AddTimeMessage(MeasuredMessage measuredMessage)
         {
             string itemValue = measuredMessage.ToString();
-
             if (!_items.ContainsKey(itemValue))
             {
                 _items[itemValue] = measuredMessage;
             }
-
-            return measuredMessage;
+            return (MeasuredMessage)_items[itemValue];
         }
     }
 }

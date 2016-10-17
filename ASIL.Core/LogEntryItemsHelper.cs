@@ -8,12 +8,12 @@ namespace ASIL.Core
     {
         private class MessageTimeInfo
         {
-            internal string MessageText { get; private set; }
+            internal string Text { get; private set; }
             internal TimeSpan Time { get; private set; }
 
             internal MessageTimeInfo(string message, TimeSpan time)
             {
-                MessageText = message;
+                Text = message;
                 Time = time;
             }
         }
@@ -168,6 +168,7 @@ namespace ASIL.Core
             {
                 return false;
             }
+            ClearCurrentEntryItems();
 
             for (int i = 0; i < _itemsCount; ++i)
             {
@@ -189,21 +190,22 @@ namespace ASIL.Core
                     if (msgWithTime != null)
                     {
                         // Message without miliseconds doesn't exist. Store it as it was.
-                        Message parentMessage = (Message)messagesCollection.GetAsObject(msgWithTime.MessageText);
+                        Message parentMessage = (Message)messagesCollection.GetAsObject(msgWithTime.Text);
                         if (parentMessage != null)
                         {
-                            MeasuredMessage measuredMsg = new MeasuredMessage(parentMessage, msgWithTime.Time);
-                            _currentLogEntryItems[i] = messagesCollection.AddTimeMessage(measuredMsg);
+                            _currentLogEntryItems[i] = messagesCollection.AddTimeMessage(new MeasuredMessage(parentMessage, msgWithTime.Time));
                             continue;
                         }
                     }
                 }
 
-                if (messagesCollection.GetAsObject(logEntryLine[i]) == null)
+                MessageBase msg = (MessageBase)messagesCollection.GetAsObject(logEntryLine[i]);
+                if (msg == null)
                 {
-                    _currentLogEntryItems[i] = messagesCollection.GetOrAddAsObject(logEntryItem);
-                    continue;
+                    msg = (MessageBase)messagesCollection.GetOrAddAsObject(logEntryItem);
                 }
+
+                _currentLogEntryItems[i] = msg;
             }
             return true;
         }
@@ -239,7 +241,8 @@ namespace ASIL.Core
                 return null;
             }
 
-            return new MessageTimeInfo(message, new TimeSpan(0, 0, 0, 0, miliseconds));
+            TimeSpan time = new TimeSpan(0, 0, 0, 0, miliseconds);
+            return new MessageTimeInfo(message, time);
         }
     }
 }

@@ -10,16 +10,30 @@ using ASIL.DynamicModel;
 using System.Linq;
 using System.Windows.Data;
 using System.Windows.Controls;
+using System;
+using System.Diagnostics;
 
 namespace ASIL
 {
+    [Flags]
+    internal enum LogFilter
+    {
+        None    = 0x00,
+        Load    = 0x01,
+        Time    = 0x02,
+        All     = 0xFF
+    }
+
     public partial class MainWindow : Window
     {
+        private static string AppName = "ASIL";
+
+        private LogParser _logParser = new LogParser();
+        private LogFilter _logFilter = LogFilter.All;
+
         public MainWindow()
         {
             InitializeComponent();
-
-            
         }
 
         private void buttonLoad_Click(object sender, RoutedEventArgs e)
@@ -31,26 +45,91 @@ namespace ASIL
                 return;
             }
 
-            dataGrid.ItemsSource = null;
-
             try
             {
-                LogParser logParser = new LogParser();
+                _logParser.Clear();
+
                 using (StreamReader sr = new StreamReader(ofd.FileName))
                 {
-                    logParser.ParseStream(sr);
+                    _logParser.ParseStream(sr);
                 }
 
-                ObservableCollection<Record> data = GenerateEnginesViewData(logParser);
-                GenerateColumnas(data);
-                dataGrid.ItemsSource = data;
+                GenerateViewData();
+                Title = AppName + " - " + ofd.FileName;
             }
             catch (System.Exception)
             {
+                Title = AppName;
                 dataGrid.ItemsSource = null;
+                _logParser.Clear();
             }
 
             dataGrid.Items.Refresh();
+        }
+
+        private void checkBoxAll_Checked(object sender, RoutedEventArgs e)
+        {
+            if (IsChecked(checkBoxAll))
+            {
+                _logFilter = LogFilter.All;
+            }
+            else
+            {
+                _logFilter = LogFilter.None;
+                if (IsChecked(checkBoxLoad))
+                {
+                    _logFilter |= LogFilter.Load;
+                }
+                if (IsChecked(checkBoxTime))
+                {
+                    _logFilter |= LogFilter.Time;
+                }
+            }
+
+            GenerateViewData();
+        }
+
+        private void checkBoxLoad_Checked(object sender, RoutedEventArgs e)
+        {
+            if (IsChecked(checkBoxLoad))
+            {
+                _logFilter |= LogFilter.Load;
+            }
+            else
+            {
+                _logFilter &= ~LogFilter.Load;
+            }
+
+            GenerateViewData();
+        }
+
+        private void checkBoxTime_Checked(object sender, RoutedEventArgs e)
+        {
+            if (IsChecked(checkBoxTime))
+            {
+                _logFilter |= LogFilter.Time;
+            }
+            else
+            {
+                _logFilter &= ~LogFilter.Time;
+            }
+
+            GenerateViewData();
+        }
+
+        private bool IsChecked(CheckBox checkBox)
+        {
+            if (checkBox == null)
+            {
+                return false;
+            }
+
+            if (!checkBox.IsChecked.HasValue)
+            {
+                return false;
+            }
+
+            return checkBox.IsChecked.Value;
         }
 
         private ObservableCollection<Record> GenerateEnginesViewData(LogParser logParser)
@@ -59,14 +138,70 @@ namespace ASIL
 
             foreach (LogEntry logEntry in logParser.LogEntries)
             {
-                data.Add(new Record(new Property("Log Time", logEntry.LogTime.ToString()), new Property("Message", logEntry.Message.ToString())));
+                if (logEntry.Message == null)
+                {
+                    continue;
+                }
+
+                string message = logEntry.Message.ToString();
+                bool addEntry = IsEntryValidForOutput(message);
+
+                if (addEntry)
+                {
+                    data.Add(new Record(
+                        new Property("Log Time", logEntry.LogTime.ToString()),
+                        new Property("ComponentId", logEntry.EngineId.ToString()),
+                        new Property("Message", message)
+                        ));
+                }
             }
 
             return data;
         }
 
+        private bool IsEntryValidForOutput(string message)
+        {
+            if ((int)(_logFilter & LogFilter.All) == (int)LogFilter.All)
+            {
+                return true;
+            }
+
+            bool addEntry = false;
+
+            if ((int)(_logFilter & LogFilter.Load) == (int)LogFilter.Load)
+            {
+                addEntry |= message.StartsWith(@"[ReportLoading]");
+            }
+
+            if (!addEntry && (int)(_logFilter & LogFilter.Time) == (int)LogFilter.Time)
+            {
+                addEntry |= message.StartsWith(@"Generating html");
+                addEntry |= message.StartsWith(@"Rendering report");
+            }
+
+            return addEntry;
+        }
+
+        private void GenerateViewData()
+        {
+            if (dataGrid == null)
+            {
+                return;
+            }
+
+            ObservableCollection<Record> data = GenerateEnginesViewData(_logParser);
+            GenerateColumnas(data);
+            dataGrid.ItemsSource = data;
+            dataGrid.Items.Refresh();
+        }
+
         private void GenerateColumnas(ObservableCollection<Record> data)
         {
+            if (data.Count == 0)
+            {
+                return;
+            }
+
             var columns = data.First().Properties.Select((x, i) => new { Name = x.Name, Index = i }).ToArray();
             foreach (var item in columns)
             {

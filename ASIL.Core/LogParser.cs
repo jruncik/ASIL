@@ -222,6 +222,10 @@ namespace ASIL.Core
         private void ParseLine(IList<string> logEntryLine)
         {
             LogEntryBase logEntry = _logEntryItemHelper.CreateCurrentLogEntry(logEntryLine);
+            if (logEntry.Message == null)
+            {
+                return;
+            }
             _logEntries.Add(logEntry);
         }
     }

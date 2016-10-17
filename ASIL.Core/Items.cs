@@ -220,7 +220,7 @@ namespace ASIL.Core
     {
         private readonly Message _parentMessage;
 
-        public string MessageText { get { return _parentMessage.MsgText; } }
+        public string MessageText { get { return ToString(); } }
         public TimeSpan Time { get; private set; }
 
         public MeasuredMessage(Message message, TimeSpan time)
@@ -229,9 +229,16 @@ namespace ASIL.Core
             Time = time;
         }
 
+        public string TimeAsStr()
+        {
+            Int64 miliseconds = Time.Seconds * 1000 + Time.Milliseconds;
+            return String.Format("[{0} ms]", miliseconds.ToString());
+        }
+
         public override string ToString()
         {
-            return MessageText + (Time.Milliseconds * 1000).ToString() + " ms";
+            Int64 miliseconds = Time.Seconds * 1000 + Time.Milliseconds;
+            return _parentMessage.MsgText + " - " + TimeAsStr();
         }
     }
 }
