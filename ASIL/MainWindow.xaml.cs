@@ -52,7 +52,7 @@ namespace ASIL
             {
                 _logParser.Clear();
 
-                using (StreamReader sr = new StreamReader(ofd.FileName))
+                using (StreamReader sr = new StreamReader(new FileStream(ofd.FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
                     _logParser.ParseStream(sr);
                 }
@@ -160,6 +160,9 @@ namespace ASIL
         {
             ObservableCollection<Record> data = new ObservableCollection<Record>();
 
+            int columnsCount = logParser.GetEnginesCount() + 1;
+            object[] properties = null;
+
             foreach (LogEntry logEntry in logParser.LogEntries)
             {
                 if (logEntry.Message == null)
@@ -172,15 +175,33 @@ namespace ASIL
 
                 if (addEntry)
                 {
-                    data.Add(new Record(
-                        new Property("Log Time", logEntry.LogTime.ToString()),
-                        new Property("ComponentId", logEntry.EngineId.ToString()),
-                        new Property("Message", message)
-                        ));
+                    // if doesn't exist or if the time is different create new one ...
+                    if (properties == null)
+                    {
+                        properties = InitializeNewPropertiesRecord(columnsCount, logEntry.LogTime);
+                    }
+
+                    int engineIdx = logEntry.EngineId.Value.GetHashCode() + 2;    // Hash-code of EngineId = engineID, [0] LogTime, [1] = engine -1 (non specified Engine)
+
+                    if (properties[engineIdx] != null || (string)(properties[0]) != logEntry.LogTime.ToString())  // already occupied
+                    {
+                        data.Add(new Record(properties));
+                        properties = InitializeNewPropertiesRecord(columnsCount, logEntry.LogTime);
+                    }
+
+                    properties[engineIdx] = message;
                 }
             }
 
             return data;
+        }
+
+        object[] InitializeNewPropertiesRecord(int columnsCount, LogTime entryLogTime)
+        {
+            object[] properties = new object[columnsCount];
+            properties[0] = entryLogTime.ToString();
+
+            return properties;
         }
 
         private bool IsEntryValidForOutput(string message)
@@ -219,12 +240,12 @@ namespace ASIL
             }
 
             ObservableCollection<Record> data = GenerateEnginesViewData(_logParser);
-            GenerateColumnas(data);
+            GenerateColumnas(data, _logParser);
             dataGrid.ItemsSource = data;
             dataGrid.Items.Refresh();
         }
 
-        private void GenerateColumnas(ObservableCollection<Record> data)
+        private void GenerateColumnas(ObservableCollection<Record> data, LogParser logParser)
         {
             dataGrid.Columns.Clear();
 
@@ -233,12 +254,32 @@ namespace ASIL
                 return;
             }
 
-            var columns = data.First().Properties.Select((x, i) => new { Name = x.Name, Index = i }).ToArray();
+            string[] columnNames = GenerateColumnNames(logParser);
+
+            var columns = data.First().Properties.Select((x, i) => new { Index = i }).ToArray();
+
             foreach (var item in columns)
             {
-                var binding = new Binding(string.Format("Properties[{0}].Value", item.Index));
-                dataGrid.Columns.Add(new DataGridTextColumn() { Header = item.Name, Binding = binding });
+                Binding binding = new Binding(string.Format("Properties[{0}]", item.Index));
+                int width = item.Index == 0 ? 120 : 200;
+                dataGrid.Columns.Add(new DataGridTextColumn() { Header = columnNames[item.Index], Binding = binding , Width = width });
             }
+        }
+
+        private static string[] GenerateColumnNames(LogParser logParser)
+        {
+            int columnsCount = logParser.GetEnginesCount() + 1;
+            string[] columnNames = new string[columnsCount];
+
+            columnNames[0] = "Log Time";
+            columnNames[1] = "Unknown Engine";
+
+            for (int i = 2; i < columnsCount; ++i)
+            {
+                columnNames[i] = String.Format("Engine_{0}", i - 1);
+            }
+
+            return columnNames;
         }
     }
 }

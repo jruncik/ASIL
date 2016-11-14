@@ -4,5 +4,7 @@
     {
         object GetOrAddAsObject(string itemValue);
         object GetAsObject(string itemValue);
+
+        int Count { get; }
     }
 }

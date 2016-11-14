@@ -52,6 +52,11 @@ namespace ASIL.Core
             _logEntries.Clear();
         }
 
+        public int GetEnginesCount()
+        {
+            return _logEntryItemHelper.EngineIds.Count;
+        }
+
         public IEnumerable<LogTime> LogTimes { get { return _logEntryItemHelper.LogTimes; } }
         public IEnumerable<Application> Applications { get { return _logEntryItemHelper.Applications; } }
         public IEnumerable<Component> Components { get { return _logEntryItemHelper.Components; } }

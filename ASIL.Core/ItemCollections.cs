@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace ASIL.Core
 {
@@ -44,6 +43,12 @@ namespace ASIL.Core
 
             return _items[itemValue];
         }
+
+        public int Count
+        {
+            get { return _items.Count; }
+        }
+
 
         internal void Clear()
         {

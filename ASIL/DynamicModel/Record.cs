@@ -4,15 +4,22 @@ namespace ASIL.DynamicModel
 {
     public class Record
     {
-        private readonly ObservableCollection<Property> properties = new ObservableCollection<Property>();
+        private readonly ObservableCollection<object> properties = new ObservableCollection<object>();
 
-        public Record(params Property[] properties)
+        public Record(object[] properties)
         {
-            foreach (var property in properties)
+            foreach (object property in properties)
+            {
                 Properties.Add(property);
+            }
         }
 
-        public ObservableCollection<Property> Properties
+        public void AddProperty(object property)
+        {
+            Properties.Add(property);
+        }
+
+        public ObservableCollection<object> Properties
         {
             get { return properties; }
         }
